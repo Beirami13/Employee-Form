@@ -1,5 +1,6 @@
 from tkinter import *
 import csv
+from tkinter import messagebox
 
 root = Tk()
 root.title('Person')
@@ -11,6 +12,7 @@ top = Toplevel(root)
 top.title('Info')
 top.geometry('200x100')
 Label(top, text="You can see people's info here", bg='red').pack(fill="both", expand=True)
+Button(top, text="Close", command=top.destroy).pack()
 
 # Labels
 Label(root, text='Name:').grid(row=0, column=0, padx=5, pady=5)
@@ -25,23 +27,40 @@ l=Label(root)
 l.grid(row=5, column=1,columnspan=4 , padx=5, pady=5)
 
 # Function to save data
-def save_data(vazn=None, tahol=None, qad=None, tajrobe=None, arezoo=None):
-    name = name_entry.get()
-    family = family_entry.get()
-    weigh = weigh_spinbox.get()  # Use the Spinbox variable
-    marry = t.get()  # Use the IntVar for Checkbutton
-    height = qad_scale.get()  # Use the Scale variable
+def save_data():
+    name = name_entry.get().strip()
+    family = family_entry.get().strip()
+    
+    if not name or not family:
+        messagebox.showwarning("Warning", "Name and Family are required!")
+        return
+    
+    weigh = weigh_spinbox.get()
+    marry = t.get()
+    height = qad_scale.get()
     experience = mode_choice.get()
-    wish = text_area.get("1.0", END)
+    wish = text_area.get("1.0", END).strip()
 
-    with open('data.csv', mode='a', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow([name, family, vazn, tahol, qad, tajrobe, arezoo])
-
-    # Clear the entries after saving
-    name_entry.delete(0, END)
-    family_entry.delete(0, END)
-    text_area.delete("1.0", END)
+    try:
+        with open('data.csv', mode='a', newline='', encoding='utf-8') as file:
+            writer = csv.writer(file)
+            writer.writerow([name, family, weigh, marry, height, experience, wish])
+        
+        messagebox.showinfo("Success", "Data saved successfully!")
+        
+        # Clear all entries
+        name_entry.delete(0, END)
+        family_entry.delete(0, END)
+        text_area.delete("1.0", END)
+        weigh_spinbox.delete(0, END)
+        weigh_spinbox.insert(0, "20")
+        qad_scale.set(150)
+        t.set(0)
+        Degree.set(0)
+        mode_choice.set("Academic")
+        
+    except Exception as e:
+        messagebox.showerror("Error", f"An error occurred: {e}")
 
 # menu
 menubar = Menu(root)
@@ -58,11 +77,14 @@ family_entry = Entry(root)
 family_entry.grid(row=0, column=3, padx=5, pady=5)
 
 # Spinbox and Scale
-weigh_spinbox = Spinbox(root, from_=20, to=150)  # Named Spinbox
+weigh_spinbox = Spinbox(root, from_=20, to=150)
 weigh_spinbox.grid(row=0, column=5, padx=5, pady=5)
+weigh_spinbox.delete(0, END)
+weigh_spinbox.insert(0, "20")
 
-qad_scale = Scale(root, from_=100, to=200, orient=HORIZONTAL)  # Named Scale
+qad_scale = Scale(root, from_=100, to=200, orient=HORIZONTAL)
 qad_scale.grid(row=1, column=5, padx=5)
+qad_scale.set(150)
 
 # Checkbuttons
 t = IntVar()
@@ -75,12 +97,12 @@ Checkbutton(root, text="junior", variable=Degree).grid(row=1, column=3, padx=5, 
 modes = [("Academic", "Academic"), ("Experimental", "Experimental"), ("Public class", "Public class"),
          ("Private class", "Private class"), ("you tube", "you tube")]
 mode_choice = StringVar()
-mode_choice.set("Academic")  # Default value
+mode_choice.set("Academic")
 for index, (text, value) in enumerate(modes):
     Radiobutton(root, text=text, variable=mode_choice, value=value).grid(row=2, column=index + 1, padx=5, pady=5)
 
 # Text widget
-text_area = Text(root, width=10, height=4)  # Adjusted width for better visibility
+text_area = Text(root, width=10, height=4)
 text_area.grid(row=4, column=1, padx=5, pady=5)
 
 # Canvas
@@ -94,18 +116,25 @@ canvas2.create_text(80, 15, fill="red", font="times 20 italic bold", text="group
 
 #button
 def give():
-    name = name_entry.get()
-    family = family_entry.get()
-    weigh = weigh_spinbox.get()  # Use the Spinbox variable
-    marry = t.get()  # Use the IntVar for Checkbutton
-    height = qad_scale.get()  # Use the Scale variable
+    name = name_entry.get().strip()
+    family = family_entry.get().strip()
+    
+    if not name or not family:
+        messagebox.showwarning("Warning", "Please enter name and family first!")
+        return
+        
+    weigh = weigh_spinbox.get()
+    marry = t.get()
+    height = qad_scale.get()
     experience = mode_choice.get()
-    wish = text_area.get("1.0", END)
+    wish = text_area.get("1.0", END).strip()
+    
     if marry==1 :
         p=f"{name} {family} is {height} cm tall and {weigh} kg with {experience} experiences which is married wishes {wish}"
     else :
         p= f"{name} {family} is {height} cm tall and {weigh} kg with {experience} experiences which is not married wishes {wish}"
     l.config(text=p,bg='light grey')
+
 Button(root,text="give information",command=give).grid(row=4,column=2)
 
 root.mainloop()
